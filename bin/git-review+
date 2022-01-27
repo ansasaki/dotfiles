@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+#
+# Copyright (c) 2019-2020 Andreas Schneider <asn@cryptomilk.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+"""
+This is a simple program that will add Reviewed-by: tags to a range of
+commits.
+
+reviewer ids can be added to ~/.review/<id> in the form:
+
+Name <e@mail>
+"""
+
+import os
+import re
+import subprocess
+from optparse import OptionParser
+from pathlib import Path
+try:
+  import git_filter_repo as gf
+except ImportError:
+  raise SystemExit("Error: Couldn't find git_filter_repo.py.  Did you forget "
+                   "to make a symlink to git-filter-repo named "
+                   "git_filter_repo.py or did you forget to put the latter in "
+                   "your PYTHONPATH?")
+
+class ReviewPlus(object):
+    def __init__(self, reviewer):
+        self._reviewer = reviewer
+
+    def add_reviewed_by_trailer(self, commit, metadata):
+        reviewer = self._reviewer
+        if not reviewer:
+            return
+
+        # Don't review commits which are signed by the reviewer
+        trailer = bytes('Signed-Off-by: %s' % (reviewer), "utf-8")
+        if trailer in commit.message:
+            return
+
+        # Already reviewed
+        trailer = bytes('Reviewed-by: %s' % (reviewer), "utf-8")
+        if trailer in commit.message:
+            return
+
+        # We want to add the trailer, but we want it to be separated from any
+        # existing paragraphs by a blank line.  However, if the commit message
+        # already ends with trailers, then we want all trailers to be on adjacent
+        # lines.
+        if not commit.message.endswith(bytes('\n', "utf-8")):
+            commit.message += bytes('\n', "utf-8")
+        lastline = commit.message.splitlines()[-1]
+
+        if not re.match(bytes('[A-Za-z0-9-_]*[Bb]y: ', "utf-8"), lastline):
+            commit.message += bytes('\n', "utf-8")
+
+        commit.message += trailer
+
+def main():
+    usage = "Usage: %prog [options] [rev-list args] "
+    parser = OptionParser(usage=usage)
+
+    parser.add_option("-b",
+                      "--by",
+                      dest="reviewer",
+                      help="Specify reviewer id",
+                      metavar="REVIEWER")
+    (options, args) = parser.parse_args()
+
+    reviewer = ""
+
+    if options.reviewer:
+        reviewer_id = "%s/.review/%s" % (Path.home(), options.reviewer)
+        if not os.path.exists(reviewer_id):
+            raise SystemExit("Reviewer '%s' unknown" % (options.reviewer))
+
+        with open(reviewer_id, 'r') as f:
+            reviewer = f.readline().rstrip()
+        f.close()
+    else:
+        user_name = subprocess.check_output('git config user.name'.split()).rstrip()
+        user_email = subprocess.check_output('git config user.email'.split()).rstrip()
+
+        reviewer = ("%s <%s>" % (user_name.decode("utf-8"), user_email.decode("utf-8")))
+
+    toplevel = subprocess.check_output('git rev-parse --show-toplevel'.split()).rstrip()
+    os.chdir(toplevel)
+
+    if args:
+        rev_list_args = args
+    else:
+        rev_list_args = ["@{upstream}.."]
+
+    # Setting source and target to anything prevents:
+    #   * remapping origin remote tracking branches to regular branches
+    #   * deletion of the origin remote
+    #   * nuking unused refs
+    #   * nuking reflogs
+    #   * repacking
+    # so we cheat and set source and target both to '.'
+    gf_args = gf.FilteringOptions.parse_args(['--force', '--refs'] + rev_list_args)
+    gf_args.refs = rev_list_args
+
+    rp = ReviewPlus(reviewer)
+
+    filter = gf.RepoFilter(gf_args, commit_callback=rp.add_reviewed_by_trailer)
+    filter.run()
+
+if __name__ == "__main__":
+    main()

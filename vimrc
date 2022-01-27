@@ -8,9 +8,6 @@ set nocompatible	" Use Vim defaults (much better!)
 " Allow backspacing over everything in insert mode
 set bs=indent,eol,start
 
-" Keep backup file
-set backup		" keep a backup file
-
 " Read/write a .viminfo file, store 50 lines of registers
 set viminfo='20,\"50
 
@@ -19,6 +16,36 @@ set history=50
 
 " Show the cursor position all the time
 set ruler
+
+" TextEdit might fail if hidden is not set.
+set hidden
+
+" Some servers have issues with backup files, see #649.
+set nobackup
+set nowritebackup
+
+" Keep backup file
+" set backup		" keep a backup file
+
+" Give more space for displaying messages.
+set cmdheight=2
+
+" Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
+" delays and poor user experience.
+set updatetime=300
+
+" Don't pass messages to |ins-completion-menu|.
+set shortmess+=c
+
+" Always show the signcolumn, otherwise it would shift the text each time
+" diagnostics appear/become resolved.
+if has("nvim-0.5.0") || has("patch-8.1.1564")
+  " Recently vim can merge signcolumn and number column into one
+  "set signcolumn=number
+  set signcolumn=auto
+else
+  set signcolumn=yes
+endif
 
 " Only do this part when compiled with support for autocommands
 if has("autocmd")
@@ -98,6 +125,9 @@ endif
 " http://www.linuxpowertop.org/known.php
 let &guicursor = &guicursor . ",a:blinkon0"
 
+" Set dark background
+set background=dark
+
 " Show numbers
 set nu
 
@@ -144,10 +174,7 @@ nmap <leader>H :-tabmove<CR>
 nmap <leader>L :+tabmove<CR>
 
 " Move to previous tab
-nmap gr :tabprevious<CR>
-
-" YouCompleteMe GoTo command
-nmap <leader>g :YcmCompleter GoTo<CR>
+nmap gw :tabprevious<CR>
 
 " FZF configuration
 let $FZF_DEFAULT_COMMAND = 'rg --files --no-ignore-vcs --hidden'
@@ -172,11 +199,14 @@ set viewoptions=cursor,folds,slash,unix
 " Reload .vimrc and :PlugInstall to install plugins.
 call plug#begin('~/.vim/plugged')
 
+    " Install colorschemes
+    Plug 'flazz/vim-colorschemes'
+
     " Show changes when in a git repository
     Plug 'mhinz/vim-signify'
 
-    " Code completion engine
-    Plug 'ycm-core/YouCompleteMe'
+    " Code completion with coc
+    Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
     " Pretty status
     Plug 'vim-airline/vim-airline'
@@ -211,3 +241,76 @@ call plug#begin('~/.vim/plugged')
     Plug 'godlygeek/tabular'
 
 call plug#end()
+
+" Set colorscheme (colorschemes come from plugins, thus needs to be after plugin
+" loading)
+colorscheme gruvbox
+
+" Use <c-space> to trigger completion.
+if has('nvim')
+    inoremap <silent><expr> <c-space> coc#refresh()
+else
+    inoremap <silent><expr> <c-@> coc#refresh()
+endif
+
+" Use `[g` and `]g` to navigate diagnostics
+" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
+
+" GoTo code navigation.
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+" Use K to show documentation in preview window.
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+    if (index(['vim','help'], &filetype) >= 0)
+        execute 'h '.expand('<cword>')
+    elseif (coc#rpc#ready())
+        call CocActionAsync('doHover')
+    else
+        execute '!' . &keywordprg . " " . expand('<cword>')
+    endif
+endfunction
+
+" Highlight the symbol and its references when holding the cursor.
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Symbol renaming.
+nmap <leader>rn <Plug>(coc-rename)
+
+" Formatting selected code.
+xmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+
+" Remap <C-f> and <C-b> for scroll float windows/popups.
+if has('nvim-0.4.0') || has('patch-8.2.0750')
+  nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+  nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+  inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
+  inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
+  vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+  vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+endif
+
+augroup mygroup
+    autocmd!
+    " Setup formatexpr specified filetype(s).
+    autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+    " Update signature help on jump placeholder.
+    autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+augroup end
+
+" Add `:Format` command to format current buffer.
+command! -nargs=0 Format :call CocActionAsync('format')
+
+" Add `:Fold` command to fold current buffer.
+command! -nargs=? Fold :call     CocAction('fold', <f-args>)
+
+" Add `:OR` command for organize imports of the current buffer.
+command! -nargs=0 OR   :call     CocActionAsync('runCommand', 'editor.action.organizeImport')
+
