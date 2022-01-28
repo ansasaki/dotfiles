@@ -4,6 +4,7 @@ my dotfiles
 # Requires:
 
 ```
+clangd
 zsh
 oh-my-zsh
 vim
@@ -15,7 +16,7 @@ highlight
 
 Copy ``./bin`` to ``~/bin``
 
-# Install auto-completion for rust and python:
+# Install auto-completion:
 
 ```
 $ git clone https://github.com/rust-analyzer/rust-analyzer.git && cd rust-analyzer
@@ -28,4 +29,5 @@ Copy ``coc-settings.json`` to ``.vim`` directory
 ```
 :CocInstall coc-rust-analyzer
 :CocInstall coc-pyright
+:CocInstall coc-clangd
 ```
