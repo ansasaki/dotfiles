@@ -12,6 +12,7 @@ vimx
 fzf
 rg (ripgrep)
 highlight
+autopep8
 ```
 
 Copy ``./bin`` to ``~/bin``
