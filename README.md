@@ -31,4 +31,5 @@ Copy ``coc-settings.json`` to ``.vim`` directory
 :CocInstall coc-rust-analyzer
 :CocInstall coc-pyright
 :CocInstall coc-clangd
+:CocInstall coc-tsserver
 ```
