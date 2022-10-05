@@ -12,10 +12,29 @@ vimx
 fzf
 rg (ripgrep)
 highlight
-autopep8
+autopep8 (python3-autopep8)
+powerlevel10k
 ```
 
 Copy ``./bin`` to ``~/bin``
+
+# Install zsh
+```
+$ sudo dnf install zsh
+$ sudo dnf install zsh-syntax-highlighting
+$ sudo dnf install zsh-autosuggestions
+$ touch ~/.aliases
+```
+
+# Install ohmyzsh
+```
+$ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+```
+
+# Install powerlevel10k
+```
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+```
 
 # Install auto-completion:
 
