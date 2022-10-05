@@ -231,7 +231,7 @@ call plug#begin('~/.vim/plugged')
     Plug 'plasticboy/vim-markdown'
 
     " Markdown preview
-    Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+    Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() } }
 
     " Quickly align matching pattern
     " e.g. To align '=' in assignment sequence
@@ -313,4 +313,17 @@ command! -nargs=? Fold :call     CocAction('fold', <f-args>)
 
 " Add `:OR` command for organize imports of the current buffer.
 command! -nargs=0 OR   :call     CocActionAsync('runCommand', 'editor.action.organizeImport')
+
+" Set markdown preview to use firefox
+let g:mkdp_browser = 'firefox'
+
+" Set the markdown preview to open new window
+function OpenMarkdownPreview (url)
+    execute "!firefox -new-window " a:url
+endfunction
+let g:mkdp_browserfunc = 'OpenMarkdownPreview'
+
+" Set the markdown preview to make the functions available regardless of the
+" file type
+let g:mkdp_command_for_global = 1
 
