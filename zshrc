@@ -96,11 +96,11 @@ source $ZSH/oh-my-zsh.sh
 # export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vi'
+else
+  export EDITOR='vimx'
+fi
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -114,7 +114,6 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-alias vi=vimx
 alias vim=vimx
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
@@ -138,7 +137,9 @@ export FZF_DEFAULT_OPTS="-1 --layout=reverse-list --multi \
 vf() {
   local files
 
-  files=(${(f)"$(locate -Ai -0 $@ | grep -z -vE '~$' | fzf --read0 -0 -1 -m)"})
+  # Replaced with ripgrep (faster)
+  #files=(${(f)"$(locate -Ai -0 $@ | grep -z -vE '~$' | fzf --read0 -0 -1 -m)"})
+  files=(${(f)"$(locate -Ai -0 $@ | rg --null-data -v '~$' | fzf --read0 -0 -1 -m)"})
 
   if [[ -n $files ]]
   then
@@ -222,3 +223,6 @@ vt() {
 
 # Load various aliases
 source ~/.aliases
+
+# Use hardware acceleration
+export LIBVA_DRIVER_NAME=iHD
