@@ -14,6 +14,7 @@ rg (ripgrep)
 highlight
 autopep8 (python3-autopep8)
 powerlevel10k
+nodejs
 ```
 
 Copy ``./bin`` to ``~/bin``
