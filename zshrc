@@ -125,11 +125,12 @@ alias vim=vimx
 # Add rg as alias for it to learn csource type
 alias rg="rg --type-add 'csource:*.{h,c}'"
 
+export FZF_HIGHLIGHT_PREVIEW_OPTS="--height 100% --preview '([[ -d {} ]] && tree -C {} 2> /dev/null) || ([[ \$(file --mime {}) =~ binary ]] && hexdump -C {} 2> /dev/null) || (highlight -O ansi -l {} 2> /dev/null | bat --style=numbers --color=always {} | head -300)' --preview-window=right:50%"
+
 # Replace fzf preview with bat (+ other configs)
-export FZF_DEFAULT_OPTS="-1 --layout=reverse-list --multi \
-    --preview='[[ \$(file --mime {}) =~ binary ]] && \
-    echo {} is a binary file || \
-    (bat --style=numbers --color=always {} || cat {}) 2> /dev/null | head -300'"
+export FZF_DEFAULT_OPTS="-1 --layout=reverse-list --multi"
+export FZF_CTRL_T_OPTS="--delimiter '/' --nth=-1 $FZF_HIGHLIGHT_PREVIEW_OPTS"
+export FZF_ALT_C_OPTS="--delimiter '/' --nth=-1 $FZF_HIGHLIGHT_PREVIEW_OPTS"
 
 # vf - fuzzy open with vim from anywhere
 # ex: vf word1 word2 ... (even part of a file name)
