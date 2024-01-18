@@ -211,6 +211,9 @@ call plug#begin('~/.vim/plugged')
     " Pretty status
     Plug 'vim-airline/vim-airline'
 
+    " Status bar theme
+    Plug 'vim-airline/vim-airline-themes'
+
     " Fuzzy search files
     Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
     Plug 'junegunn/fzf.vim'
@@ -239,6 +242,8 @@ call plug#begin('~/.vim/plugged')
     " Match next character after ':'
     " :Tabularize /:\zs
     Plug 'godlygeek/tabular'
+
+    Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 
 call plug#end()
 
@@ -326,4 +331,7 @@ let g:mkdp_browserfunc = 'OpenMarkdownPreview'
 " Set the markdown preview to make the functions available regardless of the
 " file type
 let g:mkdp_command_for_global = 1
+
+" Enable powerline fonts for airline status bar
+let g:airline_powerline_fonts = 1
 
