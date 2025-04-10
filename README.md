@@ -44,6 +44,12 @@ $ git clone https://github.com/rust-analyzer/rust-analyzer.git && cd rust-analyz
 $ cargo xtask install --server
 ```
 
+# Install vim-plug plugin management
+```
+curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+```
+
 Copy ``coc-settings.json`` to ``.vim`` directory
 
 ## On vim
