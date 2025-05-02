@@ -47,6 +47,9 @@ else
   set signcolumn=yes
 endif
 
+" Remap the spacebar as leader in normal mode
+let mapleader = "\<Space>"
+
 " Only do this part when compiled with support for autocommands
 if has("autocmd")
   augroup fedora
@@ -176,13 +179,23 @@ nmap <leader>L :+tabmove<CR>
 " Move to previous tab
 nmap gw :tabprevious<CR>
 
+" Close tab
+nmap <leader>w :tabc<CR>
+
 " FZF configuration
 let $FZF_DEFAULT_COMMAND = 'rg --files --no-ignore-vcs --hidden'
+" Search and open file in CWD
 noremap <leader>o :Files<CR>
+" Search and open file from home directory
 noremap <leader>oh :Files ~<CR>
+" Search and open file reverse search
 noremap <leader>or :FZF --reverse<CR>
+" Search and open file only git files
 noremap <leader>og :GFiles<CR>
+" Search buffers
 noremap <leader>b :Buffers<CR>
+" Complete paths
+imap <c-x><c-f> <plug>(fzf-complete-path)
 
 " Folding settings
 set foldmethod=syntax
@@ -244,6 +257,9 @@ call plug#begin('~/.vim/plugged')
     Plug 'godlygeek/tabular'
 
     Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+
+    " todo.txt syntax/tooling
+    Plug 'freitass/todo.txt-vim'
 
 call plug#end()
 
@@ -319,6 +335,12 @@ command! -nargs=? Fold :call     CocAction('fold', <f-args>)
 " Add `:OR` command for organize imports of the current buffer.
 command! -nargs=0 OR   :call     CocActionAsync('runCommand', 'editor.action.organizeImport')
 
+" Add `:Hints` command to fold current buffer.
+command! -nargs=0 Hints :call     CocActionAsync('runCommand', 'document.toggleInlayHint')
+
+" Add keymap to toggle the hints quickly
+nmap <leader>h :CocCommand document.toggleInlayHint<CR>
+
 " Set markdown preview to use firefox
 let g:mkdp_browser = 'firefox'
 
@@ -334,4 +356,13 @@ let g:mkdp_command_for_global = 1
 
 " Enable powerline fonts for airline status bar
 let g:airline_powerline_fonts = 1
+
+" Select color theme for the status bar
+let g:airline_theme='base16_gruvbox_dark_hard'
+
+" Enable airline-coc integration
+let g:airline#extensions#coc#enabled = 1
+
+" Enable coc status
+let g:airline#extensions#coc#show_coc_status = 1
 
